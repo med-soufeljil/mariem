@@ -8,11 +8,14 @@ import javafx.scene.layout.AnchorPane;
 import utils.AuthContext;
 
 public class RecrutementModuleController {
+    private static RecrutementModuleController instance;
+
     @FXML private Button btnDashboard, btnCandidat, btnOffre, btnReunion;
     @FXML private AnchorPane contentArea;
 
     @FXML
     public void initialize() {
+        instance = this;
         boolean isAdmin = AuthContext.isAdmin();
         btnDashboard.setVisible(isAdmin);
         btnDashboard.setManaged(isAdmin);
@@ -24,6 +27,12 @@ public class RecrutementModuleController {
         btnOffre.setOnAction(e -> loadUI("Offre.fxml"));
         btnReunion.setOnAction(e -> loadUI("Reunion.fxml"));
         loadUI("Dashboard.fxml");
+    }
+
+    public static boolean navigateInModule(String fxml) {
+        if (instance == null) return false;
+        instance.loadUI(fxml);
+        return true;
     }
 
     private void loadUI(String fxml) {

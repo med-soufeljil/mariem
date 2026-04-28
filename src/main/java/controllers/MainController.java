@@ -12,6 +12,8 @@ import javafx.scene.layout.VBox;
 import utils.AuthContext;
 
 public class MainController {
+    private static MainController instance;
+
     @FXML private Button btnFormationFlow, btnRecruitmentFlow;
     @FXML private ToggleButton toggleDarkMode;
     @FXML private AnchorPane contentArea;
@@ -21,6 +23,7 @@ public class MainController {
 
     @FXML
     public void initialize() {
+        instance = this;
         rootPane.getStyleClass().add("light-mode");
         lblRole.setText("Role: " + (AuthContext.isAdmin() ? "ADMIN" : "USER"));
 
@@ -31,6 +34,15 @@ public class MainController {
 
         btnRecruitmentFlow.setOnAction(e -> loadUI("RecrutementModule.fxml"));
         btnFormationFlow.setOnAction(e -> loadUI("mainformation.fxml"));
+    }
+
+    public static void navigate(String fxml) {
+        if (RecrutementModuleController.navigateInModule(fxml)) {
+            return;
+        }
+        if (instance != null) {
+            instance.loadUI(fxml);
+        }
     }
 
     private void loadUI(String fxml) {
