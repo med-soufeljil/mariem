@@ -21,7 +21,7 @@ public class MainController {
     private static MainController instance;
 
     @FXML
-    private Button btnDashboard, btnCandidat, btnOffre, btnReunion;
+    private Button btnDashboard, btnCandidat, btnOffre, btnReunion, btnFormationFlow, btnRecruitmentFlow;
     @FXML
     private ToggleButton toggleDarkMode;
     @FXML
@@ -48,6 +48,8 @@ public class MainController {
         });
 
         btnDashboard.setOnAction(e -> loadUI("Dashboard.fxml"));
+        btnFormationFlow.setOnAction(e -> loadUI("mainformation.fxml"));
+        btnRecruitmentFlow.setOnAction(e -> showRecruitmentWelcome());
         btnCandidat.setOnAction(e -> loadUI("Candidat.fxml"));
         btnOffre.setOnAction(e -> loadUI("Offre.fxml"));
         btnReunion.setOnAction(e -> loadUI("Reunion.fxml"));
@@ -81,6 +83,15 @@ public class MainController {
         btnCandidat.setDisable(!isAdmin);
         btnOffre.setDisable(false);
         btnReunion.setDisable(!isAdmin);
+
+        btnFormationFlow.setDisable(false);
+        btnRecruitmentFlow.setDisable(false);
+    }
+
+    private void showRecruitmentWelcome() {
+        contentArea.getChildren().clear();
+        welcomePane.setVisible(true);
+        welcomePane.setManaged(true);
     }
 
     private void loadUI(String fxml) {
@@ -93,6 +104,7 @@ public class MainController {
                 AnchorPane.setLeftAnchor(pane, 0.0);
                 AnchorPane.setRightAnchor(pane, 0.0);
                 welcomePane.setVisible(false);
+                welcomePane.setManaged(false);
             }
         } catch (Exception ex) {
             System.err.println("Erreur lors du chargement du FXML: " + fxml);

@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="controllers.DashboardController"
+<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="controllers.RecruitmentDashboardController"
       spacing="16" styleClass="content-area" stylesheets="@style.css">
     <padding>
         <Insets top="20" right="20" bottom="20" left="20"/>
