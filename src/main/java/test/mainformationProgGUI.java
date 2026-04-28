@@ -9,7 +9,7 @@ import utils.ApiRuntime;
 
 import java.io.IOException;
 
-public class MainProgGUI extends Application {
+public class mainformationProgGUI extends Application {
 
     public static void main(String[] args) {
         launch(args);

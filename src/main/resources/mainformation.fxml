@@ -10,8 +10,8 @@
 <BorderPane prefWidth="1366" prefHeight="768"
             xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
-            fx:controller="controllers.MainController"
-            stylesheets="@Style.css"
+            fx:controller="controllers.mainformationController"
+            stylesheets="@stylef.css"
             styleClass="page-root">
 
     <left>

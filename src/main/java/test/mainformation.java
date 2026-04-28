@@ -10,7 +10,7 @@ import services.FormationService;
 import java.sql.SQLException;
 import java.time.LocalDate;
 
-public class Main {
+public class mainformation {
 
     public static void main(String[] args) {
 

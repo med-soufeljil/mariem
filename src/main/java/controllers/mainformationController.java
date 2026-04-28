@@ -14,7 +14,7 @@ import services.ExternalPublicApiService;
 import utils.ApiRuntime;
 import utils.SessionContext;
 
-public class MainController {
+public class mainformationController {
 
     @FXML private Label lblSuggestion;
     @FXML private Label lblRole;
@@ -70,7 +70,7 @@ public class MainController {
             showWarning("Accès refusé", "L'espace USER ne peut pas accéder au dashboard admin.");
             return;
         }
-        openInCurrentWindow(event, "/DashboardView.fxml", "Dashboard avancé");
+        openInCurrentWindow(event, "/dashboardformation.fxml", "Dashboard avancé");
     }
 
     @FXML
