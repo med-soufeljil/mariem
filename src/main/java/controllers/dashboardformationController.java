@@ -33,7 +33,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DashboardController {
+public class dashboardformationController {
 
     @FXML private Label lblTotalFormations;
     @FXML private Label lblTotalApprenants;

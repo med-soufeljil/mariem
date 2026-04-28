@@ -70,7 +70,7 @@ public class mainformationController {
             showWarning("Accès refusé", "L'espace USER ne peut pas accéder au dashboard admin.");
             return;
         }
-        openInCurrentWindow(event, "/DashboardView.fxml", "Dashboard avancé");
+        openInCurrentWindow(event, "/dashboardformation.fxml", "Dashboard avancé");
     }
 
     @FXML
