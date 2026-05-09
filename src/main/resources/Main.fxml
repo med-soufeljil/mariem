@@ -26,21 +26,34 @@
 
             <VBox spacing="6" styleClass="brand-box">
                 <Label text="TalentFlow" styleClass="brand-title"/>
-                <Label text="Recruitment Management Suite" styleClass="brand-subtitle"/>
+                <Label fx:id="lblModuleSubtitle" text="Unified Management Suite" styleClass="brand-subtitle"/>
             </VBox>
 
-            <Label text="Navigation" styleClass="section-label"/>
+            <Label text="Espaces" styleClass="section-label"/>
+            <Button text="💼 Gestion de recrutement" fx:id="btnRecruitmentSpace" styleClass="sidebar-btn"/>
+            <Button text="🎓 Gestion des formations" fx:id="btnTrainingSpace" styleClass="sidebar-btn"/>
 
-            <Button text="📊 Dashboard" fx:id="btnDashboard" styleClass="sidebar-btn"/>
-            <Button text="💼 Offres d'emploi" fx:id="btnOffre" styleClass="sidebar-btn"/>
-            <Button text="🗂 Applications" fx:id="btnCandidat" styleClass="sidebar-btn"/>
-            <Button text="📅 Réunions" fx:id="btnReunion" styleClass="sidebar-btn"/>
+            <VBox fx:id="recruitmentMenu" spacing="10">
+                <Label text="Recrutement" styleClass="section-label"/>
+                <Button text="📊 Dashboard" fx:id="btnDashboard" styleClass="sidebar-btn"/>
+                <Button text="💼 Offres d'emploi" fx:id="btnOffre" styleClass="sidebar-btn"/>
+                <Button text="🧾 Recrutements" fx:id="btnRecrutement" styleClass="sidebar-btn"/>
+                <Button text="🗂 Applications" fx:id="btnCandidat" styleClass="sidebar-btn"/>
+                <Button text="📅 Réunions" fx:id="btnReunion" styleClass="sidebar-btn"/>
+            </VBox>
+
+            <VBox fx:id="trainingMenu" spacing="10">
+                <Label text="Formation" styleClass="section-label"/>
+                <Button text="📘 Formations" fx:id="btnFormation" styleClass="sidebar-btn"/>
+                <Button text="👨‍🎓 Apprenants" fx:id="btnApprenant" styleClass="sidebar-btn"/>
+                <Button text="📈 Dashboard formation" fx:id="btnFormationDashboard" styleClass="sidebar-btn"/>
+            </VBox>
 
             <Region VBox.vgrow="ALWAYS"/>
 
             <VBox spacing="4" styleClass="status-card">
                 <Label text="System status" styleClass="status-title"/>
-                <Label text="● Connected to recruitment database" styleClass="status-ok"/>
+                <Label fx:id="lblSystemStatus" text="● Connected to unified database" styleClass="status-ok"/>
             </VBox>
         </VBox>
     </left>
@@ -52,8 +65,8 @@
             </padding>
 
             <VBox spacing="2">
-                <Label text="Recruitment Operations Dashboard" styleClass="topbar-title"/>
-                <Label text="Track candidates, offers, hires and interviews in one place" styleClass="topbar-subtitle"/>
+                <Label fx:id="lblTopbarTitle" text="Operations Dashboard" styleClass="topbar-title"/>
+                <Label fx:id="lblTopbarSubtitle" text="Track recruitment and training operations in one place" styleClass="topbar-subtitle"/>
             </VBox>
 
             <Region HBox.hgrow="ALWAYS"/>
@@ -69,8 +82,8 @@
             <VBox fx:id="welcomePane" alignment="TOP_LEFT" spacing="18"
                   AnchorPane.topAnchor="20" AnchorPane.bottomAnchor="20" AnchorPane.leftAnchor="20" AnchorPane.rightAnchor="20">
 
-                <Label text="Welcome back, HR Team 👋" styleClass="welcome-title"/>
-                <Label text="Choose a module from the left to start managing the full recruitment lifecycle." styleClass="welcome-subtitle"/>
+                <Label fx:id="lblWelcomeTitle" text="Welcome back, Team 👋" styleClass="welcome-title"/>
+                <Label fx:id="lblWelcomeSubtitle" text="Choose a module from the left to start managing the workflow." styleClass="welcome-subtitle"/>
 
                 <HBox spacing="16">
                     <VBox styleClass="kpi-card" HBox.hgrow="ALWAYS">

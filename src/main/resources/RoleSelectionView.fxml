@@ -9,10 +9,10 @@
 <VBox alignment="CENTER" spacing="18" prefWidth="900" prefHeight="600"
       xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
       fx:controller="controllers.RoleSelectionController"
-      stylesheets="@stylef.css" styleClass="page-root">
+      stylesheets="@style.css" styleClass="content-area">
     <padding><Insets top="30" right="30" bottom="30" left="30"/></padding>
     <Label text="Bienvenue" styleClass="hero-title"/>
-    <Label text="Choisissez votre espace" styleClass="page-title"/>
+    <Label text="Choisissez votre espace" styleClass="title-label"/>
     <ComboBox fx:id="cbRole" promptText="Sélectionner un rôle" prefWidth="280"/>
     <Button text="Entrer" onAction="#enterSelectedRole"/>
 </VBox>

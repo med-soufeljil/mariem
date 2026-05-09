@@ -9,6 +9,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.ComboBox;
 import javafx.stage.Stage;
+import utils.AuthContext;
 import utils.SessionContext;
 
 public class RoleSelectionController {
@@ -28,8 +29,9 @@ public class RoleSelectionController {
 
     private void openMainForRole(SessionContext.Role role, ActionEvent event) {
         SessionContext.setCurrentRole(role);
+        AuthContext.setRole(role == SessionContext.Role.ADMIN ? AuthContext.Role.ADMIN : AuthContext.Role.CANDIDAT);
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("/mainformation.fxml"));
+            Parent root = FXMLLoader.load(getClass().getResource("/Main.fxml"));
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
