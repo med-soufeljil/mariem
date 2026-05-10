@@ -25,6 +25,16 @@ public class LoginController {
     private final UtilisateurService utilisateurService = new UtilisateurService();
 
     @FXML
+    public void initialize() {
+        applyTheme(ThemeContext.isDarkMode());
+        toggleDarkMode.setSelected(ThemeContext.isDarkMode());
+        toggleDarkMode.selectedProperty().addListener((obs, old, dark) -> {
+            ThemeContext.setDarkMode(dark);
+            applyTheme(dark);
+        });
+    }
+
+    @FXML
     private void login() {
         try {
             Utilisateur user = utilisateurService.login(txtMail.getText().trim(), txtPassword.getText());
@@ -74,12 +84,3 @@ public class LoginController {
         alert.showAndWait();
     }
 }
-    @FXML
-    public void initialize() {
-        applyTheme(ThemeContext.isDarkMode());
-        toggleDarkMode.setSelected(ThemeContext.isDarkMode());
-        toggleDarkMode.selectedProperty().addListener((obs, old, dark) -> {
-            ThemeContext.setDarkMode(dark);
-            applyTheme(dark);
-        });
-    }
