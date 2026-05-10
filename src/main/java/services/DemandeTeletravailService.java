@@ -1,6 +1,7 @@
 package services;
 
 import models.DemandeTeletravail;
+import utils.AuthContext;
 import utils.MyDatabase;
 
 import java.sql.*;
@@ -59,15 +60,29 @@ public class DemandeTeletravailService implements IService<DemandeTeletravail> {
 
     @Override
     public List<DemandeTeletravail> recuperer() throws SQLException {
+        return recupererAvecFiltre(null, 0);
+    }
+
+    public List<DemandeTeletravail> recupererVisibles() throws SQLException {
+        if (AuthContext.isAdmin()) {
+            return recupererAvecFiltre("dt.statut = ?", "EN_ATTENTE");
+        }
+        return recupererAvecFiltre("dt.id_employe = ?", AuthContext.getCurrentUserId());
+    }
+
+    private List<DemandeTeletravail> recupererAvecFiltre(String where, Object value) throws SQLException {
         String sql = """
                 SELECT dt.*, CONCAT(COALESCE(u.prenom,''), ' ', COALESCE(u.nom,'')) AS employe_nom
                 FROM demande_teletravail dt
                 LEFT JOIN utilisateur u ON u.id = dt.id_employe
-                ORDER BY dt.date_demande DESC, dt.id DESC
-                """;
+                """ + (where == null ? "" : " WHERE " + where) + " ORDER BY dt.date_demande DESC, dt.id DESC";
         List<DemandeTeletravail> demandes = new ArrayList<>();
-        try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) demandes.add(map(rs));
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            if (where != null && value instanceof String stringValue) ps.setString(1, stringValue);
+            if (where != null && value instanceof Integer intValue) ps.setInt(1, intValue);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) demandes.add(map(rs));
+            }
         }
         return demandes;
     }
@@ -96,6 +111,34 @@ public class DemandeTeletravailService implements IService<DemandeTeletravail> {
         try (PreparedStatement ps = connection.prepareStatement("SELECT statut, COUNT(*) total FROM demande_teletravail GROUP BY statut");
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) stats.put(rs.getString("statut"), rs.getInt("total"));
+        }
+        return stats;
+    }
+
+    public Map<String, Integer> statsByMois() throws SQLException {
+        Map<String, Integer> stats = new LinkedHashMap<>();
+        try (PreparedStatement ps = connection.prepareStatement("SELECT mois_concerne, COUNT(*) total FROM demande_teletravail GROUP BY mois_concerne ORDER BY mois_concerne");
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) stats.put(rs.getString("mois_concerne"), rs.getInt("total"));
+        }
+        return stats;
+    }
+
+    public Map<String, Integer> statsByStatutVisibles() throws SQLException {
+        Map<String, Integer> stats = new LinkedHashMap<>();
+        stats.put("EN_ATTENTE", 0);
+        stats.put("APPROUVE", 0);
+        stats.put("REFUSE", 0);
+        for (DemandeTeletravail demande : recupererVisibles()) {
+            stats.merge(demande.getStatut(), 1, Integer::sum);
+        }
+        return stats;
+    }
+
+    public Map<String, Integer> statsByMoisVisibles() throws SQLException {
+        Map<String, Integer> stats = new LinkedHashMap<>();
+        for (DemandeTeletravail demande : recupererVisibles()) {
+            stats.merge(demande.getMoisConcerne(), 1, Integer::sum);
         }
         return stats;
     }

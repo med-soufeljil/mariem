@@ -22,6 +22,7 @@ public class TeletravailController {
     @FXML private TableColumn<DemandeTeletravail, Integer> colTtId, colTtEmployeId, colTtJours;
     @FXML private TableColumn<DemandeTeletravail, String> colTtEmploye, colTtMotif, colTtStatut, colTtMois;
     @FXML private TableColumn<DemandeTeletravail, LocalDate> colTtDebut, colTtFin;
+    @FXML private TableColumn<DemandeTeletravail, Void> colTtAction;
     @FXML private Button btnAddTt, btnEditTt, btnDeleteTt, btnApproveTt, btnRejectTt;
 
     private final DemandeTeletravailService ttService = new DemandeTeletravailService();
@@ -49,6 +50,28 @@ public class TeletravailController {
         ttFiltered = new FilteredList<>(ttMaster, d -> true);
         tableTt.setItems(ttFiltered);
         txtSearchTt.textProperty().addListener((obs, old, value) -> filterTeletravail(value));
+        configureActionColumn();
+    }
+
+
+    private void configureActionColumn() {
+        colTtAction.setCellFactory(col -> new TableCell<>() {
+            private final Button approve = new Button("Approuver");
+            private final Button reject = new Button("Refuser");
+            private final javafx.scene.layout.HBox box = new javafx.scene.layout.HBox(6, approve, reject);
+            {
+                approve.getStyleClass().add("apply-btn");
+                reject.getStyleClass().add("danger-btn");
+                approve.setOnAction(e -> decideTeletravail(getTableView().getItems().get(getIndex()), "APPROUVE"));
+                reject.setOnAction(e -> decideTeletravail(getTableView().getItems().get(getIndex()), "REFUSE"));
+            }
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                DemandeTeletravail demande = empty ? null : getTableView().getItems().get(getIndex());
+                setGraphic(empty || !AuthContext.isAdmin() || demande == null || !"EN_ATTENTE".equals(demande.getStatut()) ? null : box);
+            }
+        });
     }
 
     private void configureActions() {
@@ -64,15 +87,16 @@ public class TeletravailController {
 
     private void applyPermissions() {
         boolean admin = AuthContext.isAdmin();
-        btnEditTt.setDisable(!admin);
-        btnDeleteTt.setDisable(!admin);
-        btnApproveTt.setDisable(!admin);
-        btnRejectTt.setDisable(!admin);
+        btnApproveTt.setVisible(false);
+        btnApproveTt.setManaged(false);
+        btnRejectTt.setVisible(false);
+        btnRejectTt.setManaged(false);
+        colTtAction.setVisible(admin);
     }
 
     private void refreshTable() {
         try {
-            ttMaster.setAll(ttService.recuperer());
+            ttMaster.setAll(ttService.recupererVisibles());
         } catch (SQLException e) {
             showAlert(Alert.AlertType.ERROR, "Chargement", e.getMessage());
         }
@@ -95,13 +119,15 @@ public class TeletravailController {
         dialog.getDialogPane().getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
 
-        TextField idEmploye = new TextField(editing == null ? "" : String.valueOf(editing.getIdEmploye()));
+        TextField idEmploye = new TextField(editing == null ? String.valueOf(AuthContext.getCurrentUserId()) : String.valueOf(editing.getIdEmploye()));
+        idEmploye.setDisable(!AuthContext.isAdmin());
         DatePicker debut = new DatePicker(editing == null ? LocalDate.now() : editing.getDateDebut());
         DatePicker fin = new DatePicker(editing == null ? LocalDate.now() : editing.getDateFin());
         TextField nbJours = new TextField(editing == null ? "1" : String.valueOf(editing.getNbJours()));
         TextField motif = new TextField(editing == null ? "" : editing.getMotif());
         ComboBox<String> statut = new ComboBox<>(FXCollections.observableArrayList("EN_ATTENTE", "APPROUVE", "REFUSE"));
         statut.setValue(editing == null ? "EN_ATTENTE" : editing.getStatut());
+        statut.setDisable(!AuthContext.isAdmin());
         TextField mois = new TextField(editing == null ? YearMonth.now().toString() : editing.getMoisConcerne());
         TextField commentaire = new TextField(editing == null ? "" : editing.getCommentaireDecision());
 
@@ -156,10 +182,13 @@ public class TeletravailController {
     }
 
     private void decideTeletravail(String statut) {
-        DemandeTeletravail selected = tableTt.getSelectionModel().getSelectedItem();
+        decideTeletravail(tableTt.getSelectionModel().getSelectedItem(), statut);
+    }
+
+    private void decideTeletravail(DemandeTeletravail selected, String statut) {
         if (selected == null) return;
         try {
-            ttService.changerStatut(selected.getId(), statut, 1, askCommentaire(statut));
+            ttService.changerStatut(selected.getId(), statut, AuthContext.getCurrentUserId(), askCommentaire(statut));
             refreshTable();
         } catch (SQLException e) {
             showAlert(Alert.AlertType.ERROR, "Décision", e.getMessage());

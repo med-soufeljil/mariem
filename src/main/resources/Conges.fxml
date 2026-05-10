@@ -35,6 +35,7 @@
                 <TableColumn fx:id="colCongeJours" text="Jours" prefWidth="70"/>
                 <TableColumn fx:id="colCongeMotif" text="Motif" prefWidth="180"/>
                 <TableColumn fx:id="colCongeStatut" text="Statut" prefWidth="110"/>
+                <TableColumn fx:id="colCongeAction" text="Action" prefWidth="180"/>
             </columns>
         </TableView>
     </VBox>

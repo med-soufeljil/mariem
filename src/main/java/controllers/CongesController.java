@@ -21,6 +21,7 @@ public class CongesController {
     @FXML private TableColumn<DemandeConge, String> colCongeEmploye, colCongeType, colCongeMotif, colCongeStatut;
     @FXML private TableColumn<DemandeConge, LocalDate> colCongeDebut, colCongeFin;
     @FXML private TableColumn<DemandeConge, Long> colCongeJours;
+    @FXML private TableColumn<DemandeConge, Void> colCongeAction;
     @FXML private Button btnAddConge, btnEditConge, btnDeleteConge, btnApproveConge, btnRejectConge;
 
     private final DemandeCongeService congeService = new DemandeCongeService();
@@ -48,6 +49,28 @@ public class CongesController {
         congeFiltered = new FilteredList<>(congeMaster, d -> true);
         tableConge.setItems(congeFiltered);
         txtSearchConge.textProperty().addListener((obs, old, value) -> filterConges(value));
+        configureActionColumn();
+    }
+
+
+    private void configureActionColumn() {
+        colCongeAction.setCellFactory(col -> new TableCell<>() {
+            private final Button approve = new Button("Approuver");
+            private final Button reject = new Button("Refuser");
+            private final javafx.scene.layout.HBox box = new javafx.scene.layout.HBox(6, approve, reject);
+            {
+                approve.getStyleClass().add("apply-btn");
+                reject.getStyleClass().add("danger-btn");
+                approve.setOnAction(e -> decideConge(getTableView().getItems().get(getIndex()), "APPROUVE"));
+                reject.setOnAction(e -> decideConge(getTableView().getItems().get(getIndex()), "REFUSE"));
+            }
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                DemandeConge demande = empty ? null : getTableView().getItems().get(getIndex());
+                setGraphic(empty || !AuthContext.isAdmin() || demande == null || !"EN_ATTENTE".equals(demande.getStatut()) ? null : box);
+            }
+        });
     }
 
     private void configureActions() {
@@ -63,15 +86,16 @@ public class CongesController {
 
     private void applyPermissions() {
         boolean admin = AuthContext.isAdmin();
-        btnEditConge.setDisable(!admin);
-        btnDeleteConge.setDisable(!admin);
-        btnApproveConge.setDisable(!admin);
-        btnRejectConge.setDisable(!admin);
+        btnApproveConge.setVisible(false);
+        btnApproveConge.setManaged(false);
+        btnRejectConge.setVisible(false);
+        btnRejectConge.setManaged(false);
+        colCongeAction.setVisible(admin);
     }
 
     private void refreshTable() {
         try {
-            congeMaster.setAll(congeService.recuperer());
+            congeMaster.setAll(congeService.recupererVisibles());
         } catch (SQLException e) {
             showAlert(Alert.AlertType.ERROR, "Chargement", e.getMessage());
         }
@@ -94,7 +118,8 @@ public class CongesController {
         dialog.getDialogPane().getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
 
-        TextField idEmploye = new TextField(editing == null ? "" : String.valueOf(editing.getIdEmploye()));
+        TextField idEmploye = new TextField(editing == null ? String.valueOf(AuthContext.getCurrentUserId()) : String.valueOf(editing.getIdEmploye()));
+        idEmploye.setDisable(!AuthContext.isAdmin());
         ComboBox<String> type = new ComboBox<>(FXCollections.observableArrayList("CONGES_PAYES", "CONGES_VIE_PROFESSIONNELLE_FAMILIALE", "CONGES_MALADIE", "CONGES_SANS_SOLDE", "AUTRE"));
         type.setValue(editing == null ? "CONGES_PAYES" : editing.getTypeConge());
         DatePicker debut = new DatePicker(editing == null ? LocalDate.now() : editing.getDateDebut());
@@ -102,6 +127,7 @@ public class CongesController {
         TextField motif = new TextField(editing == null ? "" : editing.getMotif());
         ComboBox<String> statut = new ComboBox<>(FXCollections.observableArrayList("EN_ATTENTE", "APPROUVE", "REFUSE"));
         statut.setValue(editing == null ? "EN_ATTENTE" : editing.getStatut());
+        statut.setDisable(!AuthContext.isAdmin());
         TextField commentaire = new TextField(editing == null ? "" : editing.getCommentaireDecision());
 
         dialog.getDialogPane().setContent(formGrid(
@@ -149,10 +175,13 @@ public class CongesController {
     }
 
     private void decideConge(String statut) {
-        DemandeConge selected = tableConge.getSelectionModel().getSelectedItem();
+        decideConge(tableConge.getSelectionModel().getSelectedItem(), statut);
+    }
+
+    private void decideConge(DemandeConge selected, String statut) {
         if (selected == null) return;
         try {
-            congeService.changerStatut(selected.getId(), statut, 1, askCommentaire(statut));
+            congeService.changerStatut(selected.getId(), statut, AuthContext.getCurrentUserId(), askCommentaire(statut));
             refreshTable();
         } catch (SQLException e) {
             showAlert(Alert.AlertType.ERROR, "Décision", e.getMessage());

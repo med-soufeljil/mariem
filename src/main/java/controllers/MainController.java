@@ -1,11 +1,9 @@
 package controllers;
 
-import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.AnchorPane;
@@ -16,7 +14,6 @@ import utils.ApiRuntime;
 import utils.AuthContext;
 import utils.SessionContext;
 
-import java.util.Optional;
 
 public class MainController {
 
@@ -25,7 +22,7 @@ public class MainController {
     @FXML
     private Button btnDashboard, btnCandidat, btnOffre, btnReunion, btnRecrutement;
     @FXML
-    private Button btnRecruitmentSpace, btnTrainingSpace, btnLeaveSpace, btnFormation, btnApprenant;
+    private Button btnRecruitmentSpace, btnTrainingSpace, btnLeaveSpace, btnUsers, btnFormation, btnApprenant;
     @FXML
     private Button btnFormationDashboard, btnCongesDashboard, btnConges, btnTeletravailDashboard, btnTeletravail;
     @FXML
@@ -52,7 +49,6 @@ public class MainController {
         instance = this;
         rootPane.getStyleClass().add("light-mode");
 
-        pickRoleIfNeeded();
         syncFormationRole();
         OfferResponseHttpServer.ensureStarted();
         ApiRuntime.ensureStarted();
@@ -65,6 +61,7 @@ public class MainController {
         btnRecruitmentSpace.setOnAction(e -> showRecruitmentSpace());
         btnTrainingSpace.setOnAction(e -> showTrainingSpace());
         btnLeaveSpace.setOnAction(e -> showLeaveSpace());
+        btnUsers.setOnAction(e -> loadUI("Utilisateurs.fxml"));
 
         btnDashboard.setOnAction(e -> loadUI("Dashboard.fxml"));
         btnCandidat.setOnAction(e -> loadUI("Candidat.fxml"));
@@ -107,18 +104,6 @@ public class MainController {
         }
     }
 
-    private void pickRoleIfNeeded() {
-        if (AuthContext.getRole() != null) {
-            return;
-        }
-        ChoiceDialog<String> dialog = new ChoiceDialog<>("ADMIN", FXCollections.observableArrayList("ADMIN", "CANDIDAT"));
-        dialog.setTitle("Connexion rôle");
-        dialog.setHeaderText("Sélectionnez votre rôle");
-        dialog.setContentText("Rôle:");
-        Optional<String> choice = dialog.showAndWait();
-        AuthContext.setRole("CANDIDAT".equals(choice.orElse("ADMIN")) ? AuthContext.Role.CANDIDAT : AuthContext.Role.ADMIN);
-    }
-
     private void syncFormationRole() {
         if (SessionContext.getCurrentRole() == null) {
             SessionContext.setCurrentRole(AuthContext.isAdmin() ? SessionContext.Role.ADMIN : SessionContext.Role.USER);
@@ -127,7 +112,10 @@ public class MainController {
 
     private void applyPermissions() {
         boolean isAdmin = AuthContext.isAdmin();
-        lblRole.setText("Role: " + (isAdmin ? "ADMIN RH" : "CANDIDAT / USER"));
+        lblRole.setText("Role: " + (AuthContext.getCurrentUser() == null ? AuthContext.getRole() : AuthContext.getCurrentUser().getRole()));
+
+        btnUsers.setVisible(isAdmin);
+        btnUsers.setManaged(isAdmin);
 
         btnDashboard.setVisible(isAdmin);
         btnDashboard.setManaged(isAdmin);

@@ -33,6 +33,7 @@
             <Button text="💼 Gestion de recrutement" fx:id="btnRecruitmentSpace" styleClass="sidebar-btn"/>
             <Button text="🎓 Gestion des formations" fx:id="btnTrainingSpace" styleClass="sidebar-btn"/>
             <Button text="🌴 Gestion congés et TT" fx:id="btnLeaveSpace" styleClass="sidebar-btn"/>
+            <Button text="👥 Gestion des utilisateurs" fx:id="btnUsers" styleClass="sidebar-btn"/>
 
             <VBox fx:id="recruitmentMenu" spacing="10">
                 <Label text="Recrutement" styleClass="section-label"/>

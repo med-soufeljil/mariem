@@ -35,6 +35,7 @@
                 <TableColumn fx:id="colTtMois" text="Mois" prefWidth="100"/>
                 <TableColumn fx:id="colTtMotif" text="Motif" prefWidth="220"/>
                 <TableColumn fx:id="colTtStatut" text="Statut" prefWidth="110"/>
+                <TableColumn fx:id="colTtAction" text="Action" prefWidth="180"/>
             </columns>
         </TableView>
     </VBox>

@@ -1,6 +1,7 @@
 package services;
 
 import models.DemandeConge;
+import utils.AuthContext;
 import utils.MyDatabase;
 
 import java.sql.*;
@@ -56,15 +57,29 @@ public class DemandeCongeService implements IService<DemandeConge> {
 
     @Override
     public List<DemandeConge> recuperer() throws SQLException {
+        return recupererAvecFiltre(null, 0);
+    }
+
+    public List<DemandeConge> recupererVisibles() throws SQLException {
+        if (AuthContext.isAdmin()) {
+            return recupererAvecFiltre("dc.statut = ?", "EN_ATTENTE");
+        }
+        return recupererAvecFiltre("dc.id_employe = ?", AuthContext.getCurrentUserId());
+    }
+
+    private List<DemandeConge> recupererAvecFiltre(String where, Object value) throws SQLException {
         String sql = """
                 SELECT dc.*, CONCAT(COALESCE(u.prenom,''), ' ', COALESCE(u.nom,'')) AS employe_nom
                 FROM demande_conge dc
                 LEFT JOIN utilisateur u ON u.id = dc.id_employe
-                ORDER BY dc.date_demande DESC, dc.id DESC
-                """;
+                """ + (where == null ? "" : " WHERE " + where) + " ORDER BY dc.date_demande DESC, dc.id DESC";
         List<DemandeConge> demandes = new ArrayList<>();
-        try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) demandes.add(map(rs));
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            if (where != null && value instanceof String stringValue) ps.setString(1, stringValue);
+            if (where != null && value instanceof Integer intValue) ps.setInt(1, intValue);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) demandes.add(map(rs));
+            }
         }
         return demandes;
     }
@@ -93,6 +108,34 @@ public class DemandeCongeService implements IService<DemandeConge> {
         try (PreparedStatement ps = connection.prepareStatement("SELECT statut, COUNT(*) total FROM demande_conge GROUP BY statut");
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) stats.put(rs.getString("statut"), rs.getInt("total"));
+        }
+        return stats;
+    }
+
+    public Map<String, Integer> statsByType() throws SQLException {
+        Map<String, Integer> stats = new LinkedHashMap<>();
+        try (PreparedStatement ps = connection.prepareStatement("SELECT type_conge, COUNT(*) total FROM demande_conge GROUP BY type_conge");
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) stats.put(rs.getString("type_conge"), rs.getInt("total"));
+        }
+        return stats;
+    }
+
+    public Map<String, Integer> statsByStatutVisibles() throws SQLException {
+        Map<String, Integer> stats = new LinkedHashMap<>();
+        stats.put("EN_ATTENTE", 0);
+        stats.put("APPROUVE", 0);
+        stats.put("REFUSE", 0);
+        for (DemandeConge demande : recupererVisibles()) {
+            stats.merge(demande.getStatut(), 1, Integer::sum);
+        }
+        return stats;
+    }
+
+    public Map<String, Integer> statsByTypeVisibles() throws SQLException {
+        Map<String, Integer> stats = new LinkedHashMap<>();
+        for (DemandeConge demande : recupererVisibles()) {
+            stats.merge(demande.getTypeConge(), 1, Integer::sum);
         }
         return stats;
     }
