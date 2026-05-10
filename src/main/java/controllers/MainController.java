@@ -14,7 +14,6 @@ import javafx.scene.layout.VBox;
 import services.OfferResponseHttpServer;
 import utils.ApiRuntime;
 import utils.AuthContext;
-import utils.NavigationState;
 import utils.SessionContext;
 
 import java.util.Optional;
@@ -28,7 +27,7 @@ public class MainController {
     @FXML
     private Button btnRecruitmentSpace, btnTrainingSpace, btnLeaveSpace, btnFormation, btnApprenant;
     @FXML
-    private Button btnFormationDashboard, btnLeaveDashboard, btnConges, btnTeletravail;
+    private Button btnFormationDashboard, btnCongesDashboard, btnConges, btnTeletravailDashboard, btnTeletravail;
     @FXML
     private ToggleButton toggleDarkMode;
     @FXML
@@ -77,9 +76,10 @@ public class MainController {
         btnApprenant.setOnAction(e -> loadUI("ApprenantView.fxml"));
         btnFormationDashboard.setOnAction(e -> loadUI("dashboardformation.fxml"));
 
-        btnLeaveDashboard.setOnAction(e -> loadCongesTeletravail("DASHBOARD"));
-        btnConges.setOnAction(e -> loadCongesTeletravail("CONGE"));
-        btnTeletravail.setOnAction(e -> loadCongesTeletravail("TT"));
+        btnCongesDashboard.setOnAction(e -> loadUI("CongesDashboard.fxml"));
+        btnConges.setOnAction(e -> loadUI("Conges.fxml"));
+        btnTeletravailDashboard.setOnAction(e -> loadUI("TeletravailDashboard.fxml"));
+        btnTeletravail.setOnAction(e -> loadUI("Teletravail.fxml"));
 
         applyPermissions();
         showRecruitmentSpace();
@@ -180,16 +180,12 @@ public class MainController {
         leaveMenu.setVisible(true);
         leaveMenu.setManaged(true);
         lblModuleSubtitle.setText("Leave & Remote Work Suite");
-        lblTopbarTitle.setText("Congés et Télétravail Dashboard");
+        lblTopbarTitle.setText("Congés et Télétravail");
         lblTopbarSubtitle.setText("Pilotez les demandes congés, TT, décisions RH et indicateurs");
         lblSystemStatus.setText("● Connected to leave and remote-work database");
         showWelcome();
     }
 
-    private void loadCongesTeletravail(String view) {
-        NavigationState.congesTtView = view;
-        loadUI("CongesTeletravail.fxml");
-    }
 
     private void showWelcome() {
         contentArea.getChildren().setAll(welcomePane);
