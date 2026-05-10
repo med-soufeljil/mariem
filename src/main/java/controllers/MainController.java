@@ -14,6 +14,7 @@ import javafx.scene.layout.VBox;
 import services.OfferResponseHttpServer;
 import utils.ApiRuntime;
 import utils.AuthContext;
+import utils.NavigationState;
 import utils.SessionContext;
 
 import java.util.Optional;
@@ -25,19 +26,25 @@ public class MainController {
     @FXML
     private Button btnDashboard, btnCandidat, btnOffre, btnReunion, btnRecrutement;
     @FXML
-    private Button btnRecruitmentSpace, btnTrainingSpace, btnFormation, btnApprenant, btnFormationDashboard;
+    private Button btnRecruitmentSpace, btnTrainingSpace, btnLeaveSpace, btnFormation, btnApprenant;
+    @FXML
+    private Button btnFormationDashboard, btnLeaveDashboard, btnConges, btnTeletravail;
     @FXML
     private ToggleButton toggleDarkMode;
     @FXML
     private AnchorPane contentArea;
     @FXML
-    private VBox welcomePane, recruitmentMenu, trainingMenu;
+    private VBox welcomePane, recruitmentMenu, trainingMenu, leaveMenu;
     @FXML
     private BorderPane rootPane;
     @FXML
     private Label lblRole, lblModuleSubtitle, lblTopbarTitle, lblTopbarSubtitle, lblSystemStatus;
     @FXML
     private Label lblWelcomeTitle, lblWelcomeSubtitle;
+    @FXML
+    private Label lblKpi1Label, lblKpi1Value, lblKpi2Label, lblKpi2Value, lblKpi3Label, lblKpi3Value;
+    @FXML
+    private Label lblWorkflowTitle, lblWorkflow1, lblWorkflow2, lblWorkflow3;
 
     private String activeSpace = "recruitment";
 
@@ -58,6 +65,7 @@ public class MainController {
 
         btnRecruitmentSpace.setOnAction(e -> showRecruitmentSpace());
         btnTrainingSpace.setOnAction(e -> showTrainingSpace());
+        btnLeaveSpace.setOnAction(e -> showLeaveSpace());
 
         btnDashboard.setOnAction(e -> loadUI("Dashboard.fxml"));
         btnCandidat.setOnAction(e -> loadUI("Candidat.fxml"));
@@ -68,6 +76,10 @@ public class MainController {
         btnFormation.setOnAction(e -> loadUI("FormationView.fxml"));
         btnApprenant.setOnAction(e -> loadUI("ApprenantView.fxml"));
         btnFormationDashboard.setOnAction(e -> loadUI("dashboardformation.fxml"));
+
+        btnLeaveDashboard.setOnAction(e -> loadCongesTeletravail("DASHBOARD"));
+        btnConges.setOnAction(e -> loadCongesTeletravail("CONGE"));
+        btnTeletravail.setOnAction(e -> loadCongesTeletravail("TT"));
 
         applyPermissions();
         showRecruitmentSpace();
@@ -135,6 +147,8 @@ public class MainController {
         recruitmentMenu.setManaged(true);
         trainingMenu.setVisible(false);
         trainingMenu.setManaged(false);
+        leaveMenu.setVisible(false);
+        leaveMenu.setManaged(false);
         lblModuleSubtitle.setText("Recruitment Management Suite");
         lblTopbarTitle.setText("Recruitment Operations Dashboard");
         lblTopbarSubtitle.setText("Track candidates, offers, hires and interviews in one place");
@@ -148,11 +162,33 @@ public class MainController {
         recruitmentMenu.setManaged(false);
         trainingMenu.setVisible(true);
         trainingMenu.setManaged(true);
+        leaveMenu.setVisible(false);
+        leaveMenu.setManaged(false);
         lblModuleSubtitle.setText("Training Management Suite");
         lblTopbarTitle.setText("Training Operations Dashboard");
         lblTopbarSubtitle.setText("Track formations, learners, feedbacks and reports with the same UI");
         lblSystemStatus.setText("● Connected to training database");
         showWelcome();
+    }
+
+    private void showLeaveSpace() {
+        activeSpace = "leave";
+        recruitmentMenu.setVisible(false);
+        recruitmentMenu.setManaged(false);
+        trainingMenu.setVisible(false);
+        trainingMenu.setManaged(false);
+        leaveMenu.setVisible(true);
+        leaveMenu.setManaged(true);
+        lblModuleSubtitle.setText("Leave & Remote Work Suite");
+        lblTopbarTitle.setText("Congés et Télétravail Dashboard");
+        lblTopbarSubtitle.setText("Pilotez les demandes congés, TT, décisions RH et indicateurs");
+        lblSystemStatus.setText("● Connected to leave and remote-work database");
+        showWelcome();
+    }
+
+    private void loadCongesTeletravail(String view) {
+        NavigationState.congesTtView = view;
+        loadUI("CongesTeletravail.fxml");
     }
 
     private void showWelcome() {
@@ -166,10 +202,51 @@ public class MainController {
         if ("training".equals(activeSpace)) {
             lblWelcomeTitle.setText("Bienvenue dans la gestion des formations 🎓");
             lblWelcomeSubtitle.setText("Utilisez le même sidebar pour gérer formations, apprenants et dashboard.");
+            setWelcomeCards(
+                    "Catalogue", "Formations, niveaux et certificats",
+                    "Apprenants", "Suivi des inscriptions",
+                    "Analytics", "Dashboard et exports",
+                    "Workflow formation",
+                    "1. Créer ou mettre à jour les formations.",
+                    "2. Suivre les apprenants et feedbacks.",
+                    "3. Piloter les statistiques et exports.");
+        } else if ("leave".equals(activeSpace)) {
+            lblWelcomeTitle.setText("Bienvenue dans la gestion Congés & TT 🌴");
+            lblWelcomeSubtitle.setText("Accédez au dashboard puis gérez les demandes congés et télétravail avec CRUD complet.");
+            setWelcomeCards(
+                    "Dashboard RH", "Congés, TT et décisions",
+                    "Demandes congés", "CRUD et validation",
+                    "Demandes TT", "Suivi mensuel télétravail",
+                    "Workflow congés & TT",
+                    "1. Consulter les indicateurs du dashboard.",
+                    "2. Ajouter, modifier ou supprimer les demandes.",
+                    "3. Approuver ou refuser avec commentaire.");
         } else {
             lblWelcomeTitle.setText("Welcome back, HR Team 👋");
             lblWelcomeSubtitle.setText("Choose a module from the left to start managing the full recruitment lifecycle.");
+            setWelcomeCards(
+                    "Candidate Pipeline", "Organize profiles, contacts and CVs",
+                    "Open Positions", "Centralize offers and required skills",
+                    "Hiring Decisions", "Convert top candidates faster",
+                    "Recommended workflow",
+                    "1. Create or review open offers.",
+                    "2. Receive applications from job offers.",
+                    "3. Update statuses, generate interviews and send offers.");
         }
+    }
+
+    private void setWelcomeCards(String kpi1Label, String kpi1Value, String kpi2Label, String kpi2Value, String kpi3Label, String kpi3Value,
+                                 String workflowTitle, String workflow1, String workflow2, String workflow3) {
+        lblKpi1Label.setText(kpi1Label);
+        lblKpi1Value.setText(kpi1Value);
+        lblKpi2Label.setText(kpi2Label);
+        lblKpi2Value.setText(kpi2Value);
+        lblKpi3Label.setText(kpi3Label);
+        lblKpi3Value.setText(kpi3Value);
+        lblWorkflowTitle.setText(workflowTitle);
+        lblWorkflow1.setText(workflow1);
+        lblWorkflow2.setText(workflow2);
+        lblWorkflow3.setText(workflow3);
     }
 
     private void loadUI(String fxml) {
